@@ -18,7 +18,6 @@ const AuthButtons = () => {
       >
         Log In
       </Button>
-      AuthButtons
     </div>
   );
 };
