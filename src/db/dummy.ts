@@ -16,25 +16,25 @@ export const USERS = [
   {
     id: "2",
     image: "/avatars/user2.png",
-    name: "John Doe",
+    name: "Abhinav Sharma",
     email: "johndoe@gmail.com",
   },
   {
     id: "3",
     image: "/avatars/user3.png",
-    name: "Elizabeth Smith",
+    name: "Deepti Sharma",
     email: "elizabeth@gmail.com",
   },
   {
     id: "4",
     image: "/avatars/user4.png",
-    name: "John Smith",
+    name: "Ajay Kumar",
     email: "johnsmith@gmail.com",
   },
   {
     id: "5",
-    image: "/avatars/user4.png",
-    name: "Jane Doe",
+    image: "/avatars/user3.png",
+    name: "Anjali Sharma",
     email: "janedoe@gmail.com",
   },
 ];
