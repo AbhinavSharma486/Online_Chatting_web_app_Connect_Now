@@ -1,19 +1,27 @@
+"use client";
+
 import React from 'react';
-import { USERS } from '@/db/dummy';
+import { User } from '@/db/dummy';
 import { ScrollArea } from './ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { LogOut } from 'lucide-react';
-
+import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
+import { useSelectedUser } from '@/store/useSelectedUser';
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 interface SidebarProps {
   isCollapsed: boolean;
+  users: User[];
 }
 
-const Sidebar = ({ isCollapsed }: SidebarProps) => {
+const Sidebar = ({ isCollapsed, users }: SidebarProps) => {
 
-  const selectedUser = USERS[0];
+  const { setSelectedUser, selectedUser } = useSelectedUser();
+
+  const { user } = useKindeBrowserClient();
+
 
   return (
     <div
@@ -32,12 +40,16 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
         className='gap-2 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'
       >
         {
-          USERS.map((user, idx) => (
+          users.map((user, idx) => (
             isCollapsed ? (
               <TooltipProvider key={idx}>
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
-                    <div>
+                    <div
+                      onClick={() => {
+                        setSelectedUser(user);
+                      }}
+                    >
                       <Avatar className='my-1 flex justify-center items-center'>
                         <AvatarImage
                           src={user.image || "/user-placeholder.png"}
@@ -64,6 +76,9 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
                 className={cn(
                   "w-full justify-start gap-4 my-1", selectedUser?.email === user.email && "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink"
                 )}
+                onClick={() => {
+                  setSelectedUser(user);
+                }}
               >
                 <Avatar className='flex justify-center items-center'>
                   <AvatarImage
@@ -90,19 +105,23 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
               <div className="hidden md:flex gap-2 items-center">
                 <Avatar className='flex justify-center items-center'>
                   <AvatarImage
-                    src={"/user-placeholder.png"}
+                    src={user?.picture || "/user-placeholder.png"}
                     alt='avatar'
                     referrerPolicy='no-referrer'
                     className='w-8 h-8 border-2 border-white rounded-full'
                   />
                 </Avatar>
-                <p className='font-bold'>{"Abhinav Sharma"}</p>
+                <p className='font-bold'>
+                  {user?.given_name} {user?.family_name}
+                </p>
               </div>
             )
           }
 
           <div className="flex">
-            <LogOut size={22} cursor={"pointer"} />
+            <LogoutLink>
+              <LogOut size={22} cursor={"pointer"} />
+            </LogoutLink>
           </div>
         </div>
       </div>

@@ -5,7 +5,6 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 export async function checkAuthStatus() {
   const { getUser } = getKindeServerSession();
-
   const user = await getUser();
 
   if (!user) return { success: false };
@@ -15,7 +14,7 @@ export async function checkAuthStatus() {
 
   const existingUser = await redis.hgetall(userId);
 
-  // signup in case of user is visiting the first time
+  // sign up case: bc user is visiting our platform for the first time
   if (!existingUser || Object.keys(existingUser).length === 0) {
     const imgIsNull = user.picture?.includes("gravatar");
     const image = imgIsNull ? "" : user.picture;
