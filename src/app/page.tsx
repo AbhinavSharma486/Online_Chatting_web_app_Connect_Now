@@ -23,6 +23,14 @@ async function getUsers(): Promise<User[]> {
 
   const pipeline = redis.pipeline();
   userKeys.forEach((key) => pipeline.hgetall(key));
+
+
+  // Check if the pipeline is empty before executing
+  if (userKeys.length === 0) {
+    console.error("Pipeline is empty. No commands to execute.");
+    return [];
+  }
+
   const results = (await pipeline.exec()) as User[];
 
   const users: User[] = [];

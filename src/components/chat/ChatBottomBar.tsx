@@ -1,21 +1,26 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image as ImageIcon, Loader, SendHorizontal, ThumbsUp } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Textarea } from '../ui/textarea';
 import EmojiPicker from './EmojiPicker';
 import { Button } from '../ui/button';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { sendMessageAction } from '@/actions/message.actions';
 import { useSelectedUser } from '@/store/useSelectedUser';
 import { CldUploadWidget, CloudinaryUploadWidgetInfo } from 'next-cloudinary';
 import { Dialog, DialogFooter, DialogHeader, DialogContent, DialogTitle } from '../ui/dialog';
 import Image from 'next/image';
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
+import { pusherClient } from '@/lib/pusher';
+import { Message } from '@/db/dummy';
 
 const ChatBottomBar = () => {
 
   const [message, setMessage] = useState('');
   const { selectedUser } = useSelectedUser();
+  const { user: currentUser } = useKindeBrowserClient();
+  const queryClient = useQueryClient();
 
   const [imgUrl, setImgUrl] = useState("");
 
@@ -42,6 +47,26 @@ const ChatBottomBar = () => {
       setMessage(message + "\n");
     }
   };
+
+  useEffect(() => {
+    const channelName = `${currentUser?.id}__${selectedUser?.id}`.split("__").sort().join("__");
+    const channel = pusherClient?.subscribe(channelName);
+
+    const handleNewMessage = (data: { message: Message; }) => {
+      queryClient.setQueryData(["messages", selectedUser?.id], (oldMessages: Message[]) => {
+        return [...oldMessages, data.message];
+      });
+    };
+
+
+    channel.bind("newMessage", handleNewMessage);
+
+    return () => {
+      channel.unbind("newMessage", handleNewMessage);
+      pusherClient.unsubscribe(channelName);
+    };
+
+  }, [currentUser?.id, selectedUser?.id, queryClient]);
 
 
   return (
