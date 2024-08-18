@@ -20,8 +20,9 @@ async function getUsers(): Promise<User[]> {
   const { getUser } = getKindeServerSession();
   const currentUser = await getUser();
 
+
   const pipeline = redis.pipeline();
-  userKeys.forEach(key => pipeline.hgetall(key));
+  userKeys.forEach((key) => pipeline.hgetall(key));
   const results = (await pipeline.exec()) as User[];
 
   const users: User[] = [];
@@ -30,7 +31,6 @@ async function getUsers(): Promise<User[]> {
       users.push(user);
     }
   }
-
   return users;
 }
 

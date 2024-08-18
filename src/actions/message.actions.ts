@@ -1,5 +1,6 @@
 "use server";
 
+import { Message } from "@/db/dummy";
 import { redis } from "@/lib/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
@@ -18,6 +19,18 @@ export async function sendMessageAction({ content, messageType, receiverId }: Se
   const senderId = user.id;
 
   const conversationId = `conversation:${[senderId, receiverId].sort().join(":")}`;
+
+  // the issue with this has been explained in the tutorial, we need to sort the ids to make the conversation id is always tthe same
+  // Abhinav , ajay
+  // 6004    , 6005
+
+  // Abhinav sends a message to ajay
+  // senderId: 6004 , receiverId: 6005
+  // `conversation:6004:6005`
+
+  // Ajay sends a message to abhinav
+  // senderId: 6005 , receiverId: 6004
+  // `conversation:6005:6004`
 
   const conversationExists = await redis.exists(conversationId);
 
@@ -48,13 +61,16 @@ export async function sendMessageAction({ content, messageType, receiverId }: Se
   return { success: true, conversationId, messageId };
 }
 
-// Abhinav , ajay
-// 6004    , 6005
+export async function getMessages(selectedUserId: string, currentUserId: string) {
+  const conversationId = `conversation:${[selectedUserId, currentUserId].sort().join(":")}`;
 
-// Abhinav sends a message to ajay
-// senderId: 6004 , receiverId: 6005
-// `conversation:6004:6005`
+  const messageIds = await redis.zrange(`${conversationId}:messages`, 0, -1);
 
-// Ajay sends a message to abhinav
-// senderId: 6005 , receiverId: 6004
-// `conversation:6005:6004`
+  if (messageIds.length === 0) return [];
+
+  const pipeline = redis.pipeline();
+  messageIds.forEach((messageId) => pipeline.hgetall(messageId as string));
+  const messages = (await pipeline.exec()) as Message[];
+
+  return messages;
+}
