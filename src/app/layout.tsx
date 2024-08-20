@@ -20,10 +20,10 @@ export const metadata: Metadata = {
       { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#5bbad5" },
     ],
   },
-  themeColor: "#ffffff",
-  other: {
-    "msapplication-TileColor": "#da532c",
-  },
+  // themeColor: "#ffffff",
+  // other: {
+  //   "msapplication-TileColor": "#da532c",
+  // },
 };
 
 export default function RootLayout({
